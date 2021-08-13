@@ -1,5 +1,3 @@
-# RECEIVER
-
 import socket
 import struct
 import zlib
