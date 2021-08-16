@@ -28,8 +28,8 @@ class SendParameters:
                 level/software = 1
                 synchronization = 2
                 edge/hardware = 3
-                More information for trigger modes at
-                https://www.oceaninsight.com/globalassets/catalog-blocks-and-images/manuals--instruction-old-logo/electronic-accessories/external-triggering-options_firmware3.0andabove.pdf
+            More information for trigger modes at
+            https://www.oceaninsight.com/globalassets/catalog-blocks-and-images/manuals--instruction-old-logo/electronic-accessories/external-triggering-options_firmware3.0andabove.pdf
         int_time: <int>
             Integration time in microseconds.
         device_num: <int>
