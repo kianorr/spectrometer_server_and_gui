@@ -5,21 +5,21 @@ group = '224.1.1.1'
 port = 5004
 address = [group, port]
 ttl = 2
-chunkSize = 10
+chunk_size = 10
 
 # Initializing ReceiveParameters methods
 p = ReceiveParameters(address)
-p.sockets_Receive()
-params = p.receiveParameters()
+p.set_socket_receive()
+params = p.receive_parameters()
 
 # SpecInfo class parameters
 # From client.py, SpecInfo_parameters = [trigVal, intTime, deviceNum]
-trigVal = params[0]
-intTime = params[1]
-deviceNum = params[2]
+trig_val = params[0]
+int_time = params[1]
+device_num = params[2]
 
 # Initializing Server methods
-s = Server(chunkSize, address, ttl, trigVal, intTime, deviceNum)
-s.sockets_Send()
-s.getData()
-s.sendData()
+s = Server(chunk_size, address, ttl, trig_val, int_time, device_num)
+s.set_socket_send()
+s.get_data()
+s.send_data()
