@@ -1,25 +1,37 @@
-from server import Server, ReceiveParameters
+from server import SendSpecData, ReceiveSettings
+import json
 
 # Server class parameters
-group = '224.1.1.1'
+group = '127.0.0.1'
 port = 5004
-address = [group, port]
+server_address = [group, port]
 ttl = 2
-chunk_size = 10
+chunk_size = 500
 
-# Initializing ReceiveParameters methods
-p = ReceiveParameters(address)
-p.set_socket_receive()
-params = p.receive_parameters()
+# Initializing SendSpecData class
+s = SendSpecData(chunk_size, server_address, ttl)
+while True:
 
-# SpecInfo class parameters
-# From client.py, SpecInfo_parameters = [trigVal, intTime, deviceNum]
-trig_val = params[0]
-int_time = params[1]
-device_num = params[2]
+    # Initializing ReceiveSettings class and socket
+    r = ReceiveSettings(server_address)
+    r.set_socket_receive()
 
-# Initializing Server methods
-s = Server(chunk_size, address, ttl, trig_val, int_time, device_num)
-s.set_socket_send()
-s.get_data()
-s.send_data()
+    # Receiving data and deciding what to do with it
+    received_data = r.receive_settings()
+    if len(received_data[0]) == 0:
+        client_address = received_data[1]
+    else:
+        settings = []
+        settings = json.loads(received_data[0])
+        client_address = received_data[1]
+
+    # Settings for spectrometer
+    trig_val = settings[0]
+    int_time_micros = settings[1]
+
+    # Initializing Server methods
+    s.setup_spec(trig_val, int_time_micros)
+    s.set_socket_send()
+    s.get_data()
+
+    s.send_data(client_address)
