@@ -1,32 +1,30 @@
 import socket
-import struct
-import json
 import math
-import numpy as np
 from specDataClass import SpecInfo
 
 # Receives parameters for spectrometer settings from client
-class ReceiveParameters:
-    '''Receives parameters (trig_val, int_time, device_num) from client for adjusting spectrometer settings.
+
+class ReceiveSettings:
+    '''Receives parameters (`trig_val`, `int_time_micros`) from client for adjusting spectrometer settings.
     
     Attributes
     ----------
-    address (list): contains ip address (group) and port number in form [group, port]
+    server_address (list): contains ip address (group) and port number in form `[group, port]`
     '''
-    def __init__(self, address):
+    def __init__(self, server_address):
         '''Constructor for ReceiveParameters class.
         
         Parameters
         ----------
-        address: <list>
-            contains ip address (group) and port number in form [group, port].
+        server_address: <list>
+            contains server ip address (group) and port number in form [IP, port].
         '''
-        self.address = address
+        self.server_address = server_address
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     
     # Setting up for receiving
     def set_socket_receive(self):
-        '''Sets socket option for receiving data.
+        '''Sets socket option for reusing address and binds socket to the server address.
         
         Notes
         -----
@@ -35,91 +33,93 @@ class ReceiveParameters:
             If you want the port receiving on a specific group, then do sock.bind((group, port))
         '''
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind(('', self.address[1]))
-        mreq = struct.pack("4sl", socket.inet_aton(self.address[0]), socket.INADDR_ANY)
-        self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        self.sock.bind(tuple(self.server_address))
     
     # Received in bytes then converted
-    def receive_parameters(self):
-        '''Receives spectrometer parameters (trig_val, int_time, device_num) from client.
+    def receive_settings(self):
+        '''Receives spectrometer parameters (trig_val, int_time_micros) from client.
         
         Converts parameters from bytes to the original list sent from client.
         
         Returns
         -------
-        SpecInfo_parameters: <list>
-            In form of [trig_val, int_time, device_num].
+        received_data: <bytes>
+            Could be zero bytes or the spectrometer settings in bytes
+        client_address: <>
+            Address of the client from which the data came from.
         '''
-        spec_parameters_bytes = self.sock.recv(4096)
-        spec_parameters = json.loads(spec_parameters_bytes)
-        return spec_parameters
+        received_data, client_address = self.sock.recvfrom(4096)
+        return received_data, client_address
 
 # Sends spectrometer data to client
-class Server(SpecInfo):
-    def __init__(self, chunk_size, address, ttl, trig_val, int_time, device_num):
-        ''' Constructor for Server class.
+class SendSpecData(SpecInfo):
+    '''Sends spectrum data to client.
+    
+    Parameters
+    ----------
+    chunk_size (int): Determines how many bytes are sent at a time.
+    address (list): contains ip address (group) and port number in form [IP, port].
+    ttl (int): Time that a datagram has to live in the network.
+    '''
+    def __init__(self, chunk_size, address, ttl):
+        '''Constructor for SendSpecData class.
         
         Parameters
         ----------
         chunk_size: <int>
             Determines how many bytes are sent at a time.
         address: <list>
-            contains ip address (group) and port number in form [group, port].
+            contains ip address (group) and port number in form [IP, port].
         ttl: <int>
             Time that a datagram has to live in the network.
-        trig_val: <int>
-            Sets trigger mode.
-        int_time: <int>
-            Sets integration time in microseconds.
-        device_num: <int>
-            Sets which device you want to use if there are multiple. If there is only one, then choose 0.
-        
-        Notes
-        -----
-        As of right now, trig_val, int_time, and device_num have to be set in the client.
         '''
-        SpecInfo.__init__(self, trig_val, int_time, device_num)
-        SpecInfo.get_spec(self)
+        SpecInfo.__init__(self)
         self.chunk_size = chunk_size
         self.address = address
         self.ttl = ttl
-        self.spectrum = b""
+        self.spec = b""
         self.shape = ()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     
     # Setting socket to be able to send data
     def set_socket_send(self):
-        '''Sets socket option for receiving data.'''
+        '''Sets socket option for sending data.'''
         self.sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, self.ttl)
         
     def get_data(self):
-        ''' Gets spectrum data from SpecInfo class.
+        '''Gets spectrum data from SpecInfo class.
         
         Returns
         -------
-        spectrumCompressed: <bytes>
+        spec: <bytes>
+            Spectrum in bytes.
         '''
-        self.spectrum = SpecInfo.get_spec_compressed(self)
+        SpecInfo.get_spec(self)
+        self.spec = SpecInfo.get_spec_compressed(self)
         self.shape = list(SpecInfo.get_shape(self))
-        return self.spectrum
+        return self.spec
 
-    def send_data(self):
+    def send_data(self, client_address):
         '''Sends the compressed spectrum data, an empty bytes string, and the shape of the original np array.
         
         An empty bytes string is sent over to the client so the client knows when to stop receiving data.
+
+        Parameters
+        ----------
+        client_address: <tuple>
+            Address of the client from which the data came from.
         '''
         # Sending over spectrum data by chunk
         b = b""
         i = 0
-        for i in range(math.ceil(len(self.spectrum) / self.chunk_size)):
-            b = self.spectrum[i * self.chunk_size:(i + 1) * self.chunk_size]
-            self.sock.sendto(b, (self.address[0], self.address[1]))
-            
+        for i in range(math.ceil(len(self.spec) / self.chunk_size)):
+            b = self.spec[i * self.chunk_size:(i + 1) * self.chunk_size]
+            self.sock.sendto(b, client_address)
+        print("Data has been sent.")    
+
         # Sending over 0 bytes so recv loop knows when to stop
         b0 = b""
-        self.sock.sendto(b0, (self.address[0], self.address[1]))
+        self.sock.sendto(b0, client_address)
 
         # Sending over shape for reshaping
-        self.sock.sendto(b"%a" % self.shape, (self.address[0], self.address[1]))
-        
-        self.sock.close()
+        self.sock.sendto(b"%a" % self.shape, client_address)
