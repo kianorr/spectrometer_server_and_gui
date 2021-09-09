@@ -201,8 +201,3 @@ class SpecApp(tk.Frame, SendSettings, ReceiveSpecData):
         '''Closes the window and stops the mainloop.'''
         self.root.quit()     # stops mainloop
         self.root.destroy()
-
-# root = tk.Tk()
-# myapp = App(root)
-# root.geometry("800x550")
-# myapp.mainloop()
