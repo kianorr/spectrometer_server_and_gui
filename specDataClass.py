@@ -3,65 +3,49 @@ import zlib
 import numpy as np
 
 class SpecInfo(Spectrometer):
-    '''
-    Initializes OceanInsight device and obtains spectrum data using python-seabreeze library.
+    '''Initializes OceanInsight device and obtains spectrum data using python-seabreeze library.
     
-    Inherits Spectrometer class from seabreeze.
-    
-    Attributes
-    ----------
-    trigVal (int): Sets trigger mode. See setTriggerMode() method.
-    intTime (int): Integration time in microseconds.
-    deviceNum (int): Sets which device you want to use if there are multiple. If there is only one, then choose 0.
+    Inherits Spectrometer class from seabreeze.spectrometers.
     '''
-    def __init__(self, trig_val, int_time, device_num):
+    def __init__(self):
+        '''Constructor for SpecInfo class.
+        
+        Initializes Spectrometer class from seabreeze.spectrometers.
         '''
-        Constructor for SpecInfo class.
+        # Initializing spectrometer device
+        device = list_devices()[0]
+        Spectrometer.__init__(self, device)
+        self.spectrometer = Spectrometer(device)
+        
+        # Initializing spectrum data
+        self.spectrum_data = np.array([[]])
+
+    def setup_spec(self, trig_val, int_time_ms):
+        '''Sets trigger mode and integration time.
         
         Parameters
         ----------
-        trigVal (int): Sets trigger mode. See setTriggerMode() method.
-        intTime (int): Integration time in microseconds.
-        deviceNum (int): Sets which device you want to use if there are multiple. If there is only one, then choose 0.
-        '''
-        device = list_devices()[device_num]
-        Spectrometer.__init__(self, device)
-        self.spectrometer = Spectrometer(device)
-        self.spectrum_data = np.array([[]])
-        self.trig_val = trig_val
-        self.int_time = int_time
-    
-    def __set_trigger_mode(self):
-        ''' 
-        This function sets the trigger mode.
+        trig_val: <int>
+            normal = 0\n
+            level/software = 1\n
+            synchronization = 2\n
+            edge/hardware = 3
         
-        A specific trigger mode can be set with the following values:
-        normal = 0
-        level/software = 1
-        synchronization = 2
-        edge/hardware = 3 
+        int_time_ms: <int>
+            Integration time in microseconds.
         '''
-        spec = self.spectrometer
-        spec.trigger_mode(self.trig_val)
-    
-    # Sets integration time in microseconds
-    def __set_int_time(self):
-        '''
-        This function sets the integration time in microseconds.
-        '''
-        spec = self.spectrometer
-        spec.integration_time_micros(self.int_time)
-    
+        self.spectrometer.trigger_mode(trig_val)
+        self.spectrometer.integration_time_micros(int_time_ms)
+
     # Gets spectrometer data using seabreeze's spectrum() function
     def get_spec(self):
-        '''
-        This function obtains data (intensity and wavelength) from the spectrometer.
+        '''This function obtains data (intensity and wavelength) from the spectrometer.
         
         The data is obtained using seabreeze's spectrum() function.
         
         Returns
         -------
-        spectrumData: <numpy.ndarray>
+        spectrum_data: <numpy.ndarray>
             2D array that contains wavelengths and intensities.
         '''
         spec = self.spectrometer
@@ -69,8 +53,7 @@ class SpecInfo(Spectrometer):
         return self.spectrum_data
         
     def get_shape(self):
-        '''
-        Gets the shape of the 2D numpy array for the spectrum.
+        '''Gets the shape of the 2D numpy array for the spectrum.
 
         Returns
         -------
@@ -81,12 +64,12 @@ class SpecInfo(Spectrometer):
     
     # Compresses spectrometer data for easy sending
     def get_spec_compressed(self):
-        '''
-        Compresses spectrum data from getSpec() for easy sending.
+        '''Compresses spectrum data from getSpec() method for easy sending.
 
         Returns
         -------
-        specCompressed: <bytes>
+        spec_compressed: <bytes>
+            compresses the spectrum using zlib.
         '''
-        spec_compressed = zlib.compress(self.spectrum_data.tobytes())
+        spec_compressed = zlib.compress(self.spectrum_data.tobytes(), 0)
         return spec_compressed
