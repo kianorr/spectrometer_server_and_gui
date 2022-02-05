@@ -8,12 +8,14 @@ server_address = (ip, port)
 ttl = 2
 chunk_size = 500
 
-# Initializing SendSpecData class
+# Initializing SendSpecData and ReceiveSettings classes
 s = SendSpecData(chunk_size, server_address, ttl)
+r = ReceiveSettings()
 while True:
-
-    # Initializing ReceiveSettings class and socket
-    r = ReceiveSettings(server_address)
+    
+    # Setting up address and socket, which is then set to receive
+    r.set_server_address(server_address)
+    r.set_sock()
     r.set_socket_receive()
 
     # Receiving data and deciding what to do with it
