@@ -1,7 +1,8 @@
 # UDP Multicast Server for OceanInsight Spectrometer
 UDP multicast server for sending spectrometer data. Spectrometer settings can be set from client side.
 
-![image](https://user-images.githubusercontent.com/60586957/150287991-54965f6d-bfe2-4e6e-8ae7-5f7dd01c4e84.png)
+![image](https://user-images.githubusercontent.com/60586957/152635600-66e31da5-2bba-4239-b36f-e73af1b37fea.png)
+
 
 ## Instructions
 1. Run main_client.py to send over parameters.
