@@ -5,5 +5,5 @@ UDP multicast server for sending spectrometer data. Spectrometer settings can be
 
 
 ## Instructions
-1. Run main_client.py to send over parameters.
-2. Run main_server.py to receive parameters. Then everything else should run smoothly.
+1. Run main_server.py to receive parameters.
+2. Run main_client.py and press "Start Animation" to start and send over parameters.
