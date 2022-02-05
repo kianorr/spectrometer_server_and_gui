@@ -212,8 +212,6 @@ class SpecApp(tk.Frame, SendSettings, ReceiveSpecData):
         self.server_address = (setting_list[2], int(setting_list[3]))
 
         self.send_settings_from_gui(self.server_address, trig_val, self.int_time_micros)
-        # self.display_animation(self.server_address)
-        # self.collect_only_data(self.server_address)
 
     def send_settings_from_gui(self, server_address, trig_val, int_time_micros):
         '''Sends settings from GUI using methods from SendSettings
@@ -234,14 +232,6 @@ class SpecApp(tk.Frame, SendSettings, ReceiveSpecData):
         self.s = SendSettings(server_address, trig_val, int_time_micros)
         self.s.send_settings()
         self.client_port = self.s.get_port()
-
-    # def collect_only_data(self):
-    #     '''Plan to make this only collect data without the animation but it's broken.'''
-    #     self.save_settings()
-    #     self.r = ReceiveSpecData()
-    #     while self.save_bool == True:
-    #         spec = self.receive_data_for_gui(self.s, self.r, self.server_address, self.client_port)
-    #         SaveData(self.file_number).save_data(spec)
 
     def display_animation(self):
         '''Creates the animation.'''
