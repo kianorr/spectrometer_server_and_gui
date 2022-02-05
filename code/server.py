@@ -10,7 +10,7 @@ class ReceiveSettings:
     ----------
     server_address (list): contains ip address (group) and port number in form `[group, port]`
     '''
-    def __init__(self, server_address):
+    def __init__(self, server_address : list = None):
         '''Constructor for ReceiveParameters class.
         
         Parameters
@@ -18,9 +18,24 @@ class ReceiveSettings:
         server_address: <list>
             contains server ip address (group) and port number in form [IP, port].
         '''
-        self.server_address = server_address
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        if server_address != None:
+            self.server_address = server_address
     
+    def set_server_address(self, server_address : list) -> None:
+        '''Sets server address.'''
+        self.server_address = server_address
+
+    def set_sock(self):
+        '''
+        Sets socket for server.
+        
+        Notes
+        -----
+        Not in __init__ because it needs to be reinitiated each time it goes through
+        the `while` loop in `main_server.py`.
+        '''
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        
     # Setting up for receiving
     def set_socket_receive(self):
         '''Sets socket option for reusing address and binds socket to the server address.
