@@ -7,3 +7,8 @@ UDP multicast server for sending spectrometer data. Spectrometer settings can be
 ## Instructions
 1. Run main_server.py to receive parameters.
 2. Run main_client.py and press "Start Animation" to start and send over parameters.
+- or alternatively, run main_client_no_gui.py
+
+### A Couple Warnings
+1. Matplotlib is slow and say for 16 $\mu$s shot with 4 $\mu$s integration time, there might only be two spectrums collected.
+2. File names might write over each other if the client is closed and restarted.
