@@ -10,5 +10,5 @@ UDP multicast server for sending spectrometer data. Spectrometer settings can be
 - or alternatively, run main_client_no_gui.py
 
 ### A Couple Warnings
-1. `matplotlib` is slow and say for 16 $\mu$s shot with 4 $\mu$s integration time, there might only be two spectrums collected. Planning on fixing it but haven't gotten the chance.
+1. `matplotlib` is slow and say for 16 ms shot with 4 ms integration time, there might only be two spectrums collected. Planning on fixing it but haven't gotten the chance.
 2. File names might write over each other if the client is closed and restarted.
