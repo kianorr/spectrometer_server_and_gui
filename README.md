@@ -3,6 +3,9 @@ UDP multicast server for sending spectrometer data. Spectrometer settings can be
 
 ![image](https://user-images.githubusercontent.com/60586957/152635600-66e31da5-2bba-4239-b36f-e73af1b37fea.png)
 
+The resulting .mp4 file looks like this:
+https://user-images.githubusercontent.com/60586957/159230378-35c8532e-0054-4239-85e5-03fae5710323.mp4
+
 
 ## Instructions
 1. Run main_server.py to receive parameters.
